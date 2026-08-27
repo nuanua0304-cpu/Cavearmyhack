@@ -1,5 +1,3 @@
-local API_URL = "https://friend-liable-genetics-throat.trycloudflare.com"
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
@@ -31,10 +29,10 @@ local function LoadMainScript()
     CaveGui.ResetOnSpawn = false
     CaveGui.Parent = SafeGuiParent
 
-    -- 메인 프레임 (모던 디자인 적용)
+    -- 메인 프레임 (가로형, 콤팩트 사이즈)
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 380, 0, 300)
-    Frame.Position = UDim2.new(0.5, -190, 0.4, -150)
+    Frame.Size = UDim2.new(0, 420, 0, 220)
+    Frame.Position = UDim2.new(0.5, -210, 0.7, -110)
     Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
     Frame.BackgroundTransparency = 0.05
     Frame.BorderSizePixel = 0
@@ -43,7 +41,7 @@ local function LoadMainScript()
     Frame.Parent = CaveGui
 
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 12)
+    UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = Frame
     
     local UIStroke = Instance.new("UIStroke")
@@ -51,26 +49,26 @@ local function LoadMainScript()
     UIStroke.Thickness = 1
     UIStroke.Parent = Frame
 
-    -- 상단 타이틀
+    -- 상단 타이틀 (크기 축소)
     local TitleFrame = Instance.new("Frame")
-    TitleFrame.Size = UDim2.new(1, 0, 0, 45)
+    TitleFrame.Size = UDim2.new(1, 0, 0, 35)
     TitleFrame.BackgroundTransparency = 1
     TitleFrame.Parent = Frame
 
     local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, -30, 1, 0)
+    Title.Size = UDim2.new(1, -20, 1, 0)
     Title.Position = UDim2.new(0, 15, 0, 0)
     Title.BackgroundTransparency = 1
     Title.Text = "HCS PREMIUM SCRIPT"
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.TextSize = 16
+    Title.TextSize = 13
     Title.Font = Enum.Font.GothamBold
     Title.Parent = TitleFrame
     
     local TitleLine = Instance.new("Frame")
-    TitleLine.Size = UDim2.new(1, -30, 0, 1)
-    TitleLine.Position = UDim2.new(0, 15, 1, -1)
+    TitleLine.Size = UDim2.new(1, -20, 0, 1)
+    TitleLine.Position = UDim2.new(0, 10, 1, -1)
     TitleLine.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
     TitleLine.BorderSizePixel = 0
     TitleLine.Parent = TitleFrame
@@ -101,14 +99,14 @@ local function LoadMainScript()
     makeDraggable(Frame)
 
     local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+    ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
     ToggleBtn.Position = UDim2.new(0, 20, 0.7, 0)
     ToggleBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 28)
     ToggleBtn.BackgroundTransparency = 0.1
     ToggleBtn.Text = "HCS"
     ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     ToggleBtn.Font = Enum.Font.GothamBold
-    ToggleBtn.TextSize = 14
+    ToggleBtn.TextSize = 12
     ToggleBtn.Parent = CaveGui
     
     local BtnCorner = Instance.new("UICorner")
@@ -126,21 +124,23 @@ local function LoadMainScript()
     end)
 
     local ScrollingFrame = Instance.new("ScrollingFrame")
-    ScrollingFrame.Size = UDim2.new(1, -30, 1, -60)
-    ScrollingFrame.Position = UDim2.new(0, 15, 0, 50)
+    ScrollingFrame.Size = UDim2.new(1, -20, 1, -45)
+    ScrollingFrame.Position = UDim2.new(0, 10, 0, 38)
     ScrollingFrame.BackgroundTransparency = 1
-    ScrollingFrame.ScrollBarThickness = 4
+    ScrollingFrame.ScrollBarThickness = 3
     ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
     ScrollingFrame.BorderSizePixel = 0
     ScrollingFrame.Parent = Frame
 
-    local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.Parent = ScrollingFrame
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 8)
+    -- 세로 리스트 대신 그리드 레이아웃(가로 2단) 사용
+    local UIGridLayout = Instance.new("UIGridLayout")
+    UIGridLayout.Parent = ScrollingFrame
+    UIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIGridLayout.CellSize = UDim2.new(0, 192, 0, 32)
+    UIGridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
     
-    UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+    UIGridLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y + 10)
     end)
 
     local infAmmoEnabled, fireRateEnabled, recoilEnabled, damageEnabled, hitboxEnabled, espEnabled = false, false, false, false, false, false
@@ -405,32 +405,31 @@ local function LoadMainScript()
         end
     end)
 
-    -- [핵심] 초고퀄리티 iOS 스타일 스위치 토글 함수
+    -- [핵심] 초고퀄리티 iOS 스타일 스위치 토글 함수 (크기 축소)
     local function addToggle(text, callback)
         local Row = Instance.new("Frame")
-        Row.Size = UDim2.new(1, -10, 0, 42)
         Row.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
         Row.BorderSizePixel = 0
         Row.Parent = ScrollingFrame
 
         local RowCorner = Instance.new("UICorner")
-        RowCorner.CornerRadius = UDim.new(0, 8)
+        RowCorner.CornerRadius = UDim.new(0, 6)
         RowCorner.Parent = Row
 
         local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(1, -70, 1, 0)
-        Label.Position = UDim2.new(0, 15, 0, 0)
+        Label.Size = UDim2.new(1, -50, 1, 0)
+        Label.Position = UDim2.new(0, 12, 0, 0)
         Label.BackgroundTransparency = 1
         Label.Text = text
         Label.TextColor3 = Color3.fromRGB(220, 220, 220)
-        Label.TextSize = 14
+        Label.TextSize = 12
         Label.Font = Enum.Font.GothamSemibold
         Label.TextXAlignment = Enum.TextXAlignment.Left
         Label.Parent = Row
 
         local ToggleContainer = Instance.new("TextButton")
-        ToggleContainer.Size = UDim2.new(0, 46, 0, 24)
-        ToggleContainer.Position = UDim2.new(1, -56, 0.5, -12)
+        ToggleContainer.Size = UDim2.new(0, 36, 0, 18)
+        ToggleContainer.Position = UDim2.new(1, -44, 0.5, -9)
         ToggleContainer.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
         ToggleContainer.Text = ""
         ToggleContainer.Parent = Row
@@ -440,8 +439,8 @@ local function LoadMainScript()
         ToggleCorner.Parent = ToggleContainer
 
         local ToggleCircle = Instance.new("Frame")
-        ToggleCircle.Size = UDim2.new(0, 20, 0, 20)
-        ToggleCircle.Position = UDim2.new(0, 2, 0.5, -10)
+        ToggleCircle.Size = UDim2.new(0, 14, 0, 14)
+        ToggleCircle.Position = UDim2.new(0, 2, 0.5, -7)
         ToggleCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         ToggleCircle.Parent = ToggleContainer
         
@@ -449,8 +448,7 @@ local function LoadMainScript()
         CircleCorner.CornerRadius = UDim.new(1, 0)
         CircleCorner.Parent = ToggleCircle
         
-        -- 부드러운 애니메이션 효과 설정
-        local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         local state = false
 
         ToggleContainer.Activated:Connect(function()
@@ -460,12 +458,12 @@ local function LoadMainScript()
             local goalBG = {}
 
             if state then
-                goalCircle.Position = UDim2.new(1, -22, 0.5, -10)
-                goalBG.BackgroundColor3 = Color3.fromRGB(76, 217, 100) -- iOS Green 스타일
+                goalCircle.Position = UDim2.new(1, -16, 0.5, -7)
+                goalBG.BackgroundColor3 = Color3.fromRGB(76, 217, 100)
                 Label.TextColor3 = Color3.fromRGB(255, 255, 255)
             else
-                goalCircle.Position = UDim2.new(0, 2, 0.5, -10)
-                goalBG.BackgroundColor3 = Color3.fromRGB(60, 60, 65) -- Off 스타일
+                goalCircle.Position = UDim2.new(0, 2, 0.5, -7)
+                goalBG.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
                 Label.TextColor3 = Color3.fromRGB(220, 220, 220)
             end
 
@@ -476,23 +474,21 @@ local function LoadMainScript()
         end)
     end
 
-    -- [핵심] 초고퀄리티 버튼 함수
+    -- [핵심] 초고퀄리티 버튼 함수 (크기 축소)
     local function addButton(text, callback)
         local Btn = Instance.new("TextButton")
-        Btn.Size = UDim2.new(1, -10, 0, 42)
         Btn.BackgroundColor3 = Color3.fromRGB(50, 100, 255)
         Btn.Text = text
         Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         Btn.Font = Enum.Font.GothamBold
-        Btn.TextSize = 14
+        Btn.TextSize = 12
         Btn.Parent = ScrollingFrame
         
         local BtnCorner = Instance.new("UICorner")
-        BtnCorner.CornerRadius = UDim.new(0, 8)
+        BtnCorner.CornerRadius = UDim.new(0, 6)
         BtnCorner.Parent = Btn
         
         Btn.Activated:Connect(function()
-            -- 클릭 시 튀어오르는 효과
             local originalColor = Btn.BackgroundColor3
             TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(70, 120, 255)}):Play()
             task.wait(0.1)
@@ -528,40 +524,39 @@ local function LoadMainScript()
         end
     end)
 
-    -- 히트박스 크기 조절 모던 인풋
+    -- 히트박스 크기 조절 모던 인풋 (크기 축소)
     local InputFrame = Instance.new("Frame")
-    InputFrame.Size = UDim2.new(1, -10, 0, 42)
     InputFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
     InputFrame.Parent = ScrollingFrame
 
     local InputCorner = Instance.new("UICorner")
-    InputCorner.CornerRadius = UDim.new(0, 8)
+    InputCorner.CornerRadius = UDim.new(0, 6)
     InputCorner.Parent = InputFrame
 
     local InputLabel = Instance.new("TextLabel")
-    InputLabel.Size = UDim2.new(0.5, 0, 1, 0)
-    InputLabel.Position = UDim2.new(0, 15, 0, 0)
+    InputLabel.Size = UDim2.new(0.6, 0, 1, 0)
+    InputLabel.Position = UDim2.new(0, 12, 0, 0)
     InputLabel.BackgroundTransparency = 1
     InputLabel.Text = "히트박스 크기"
     InputLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
     InputLabel.Font = Enum.Font.GothamSemibold
-    InputLabel.TextSize = 14
+    InputLabel.TextSize = 12
     InputLabel.TextXAlignment = Enum.TextXAlignment.Left
     InputLabel.Parent = InputFrame
 
     local TextBox = Instance.new("TextBox")
-    TextBox.Size = UDim2.new(0, 60, 0, 26)
-    TextBox.Position = UDim2.new(1, -70, 0.5, -13)
+    TextBox.Size = UDim2.new(0, 50, 0, 22)
+    TextBox.Position = UDim2.new(1, -58, 0.5, -11)
     TextBox.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
     TextBox.Text = "10"
     TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     TextBox.Font = Enum.Font.GothamBold
-    TextBox.TextSize = 13
+    TextBox.TextSize = 11
     TextBox.ClearTextOnFocus = false
     TextBox.Parent = InputFrame
     
     local TBBoxCorner = Instance.new("UICorner")
-    TBBoxCorner.CornerRadius = UDim.new(0, 6)
+    TBBoxCorner.CornerRadius = UDim.new(0, 4)
     TBBoxCorner.Parent = TextBox
 
     TextBox.FocusLost:Connect(function()
@@ -575,138 +570,4 @@ local function LoadMainScript()
     end)
 end
 
-local oldLogin = SafeGuiParent:FindFirstChild("HCS_LicenseLogin")
-if oldLogin then oldLogin:Destroy() end
-
-local LoginGui = Instance.new("ScreenGui")
-LoginGui.Name = "HCS_LicenseLogin"
-LoginGui.Parent = SafeGuiParent
-
--- 로그인 UI 모던화
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 320, 0, 180)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -90)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
-MainFrame.BorderSizePixel = 0
-MainFrame.Parent = LoginGui
-
-local LCorner = Instance.new("UICorner")
-LCorner.CornerRadius = UDim.new(0, 12)
-LCorner.Parent = MainFrame
-
-local UIStrokeLogin = Instance.new("UIStroke")
-UIStrokeLogin.Color = Color3.fromRGB(60, 60, 65)
-UIStrokeLogin.Thickness = 1
-UIStrokeLogin.Parent = MainFrame
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.BackgroundTransparency = 1
-Title.Text = "HCS 라이센스 인증"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Title.Parent = MainFrame
-
-local LicenseInput = Instance.new("TextBox")
-LicenseInput.Size = UDim2.new(0, 280, 0, 42)
-LicenseInput.Position = UDim2.new(0.5, -140, 0, 60)
-LicenseInput.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-LicenseInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-LicenseInput.PlaceholderText = "라이센스 코드를 입력하세요"
-LicenseInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
-LicenseInput.Font = Enum.Font.Gotham
-LicenseInput.TextSize = 14
-LicenseInput.Parent = MainFrame
-
-local InputCorner = Instance.new("UICorner")
-InputCorner.CornerRadius = UDim.new(0, 8)
-InputCorner.Parent = LicenseInput
-
-local VerifyBtn = Instance.new("TextButton")
-VerifyBtn.Size = UDim2.new(0, 280, 0, 42)
-VerifyBtn.Position = UDim2.new(0.5, -140, 0, 115)
-VerifyBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 255)
-VerifyBtn.Text = "인증하기"
-VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-VerifyBtn.Font = Enum.Font.GothamBold
-VerifyBtn.TextSize = 15
-VerifyBtn.Parent = MainFrame
-
-local BtnCorner = Instance.new("UICorner")
-BtnCorner.CornerRadius = UDim.new(0, 8)
-BtnCorner.Parent = VerifyBtn
-
-local function SendVerifyRequest(code)
-    local url = string.format(API_URL, code, LocalPlayer.Name)
-    
-    local req = (syn and syn.request) or (http and http.request) or http_request or request
-    if req then
-        local s1, r1 = pcall(function()
-            return req({
-                Url = url,
-                Method = "GET",
-                Headers = {
-                    ["User-Agent"] = "Mozilla/5.0",
-                    ["Accept"] = "*/*"
-                }
-            })
-        end)
-        if s1 and r1 and r1.Body then
-            return true, tostring(r1.Body)
-        end
-    end
-
-    local success, result = pcall(function()
-        return game:HttpGet(url, true)
-    end)
-    if success and type(result) == "string" then
-        return true, result
-    end
-
-    return false, tostring(result)
-end
-
-VerifyBtn.Activated:Connect(function()
-    local code = LicenseInput.Text
-    if code == "" then
-        VerifyBtn.Text = "코드를 입력해주세요!"
-        task.wait(1.5)
-        VerifyBtn.Text = "인증하기"
-        return
-    end
-    
-    VerifyBtn.Text = "서버 확인 중..."
-    
-    -- 버튼 클릭 효과
-    TweenService:Create(VerifyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 80, 200)}):Play()
-    
-    local success, response = SendVerifyRequest(code)
-    local cleanResponse = response and string.gsub(response, "%s+", "") or ""
-    
-    if success and cleanResponse == "VALID" then
-        TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(50, 200, 100)}):Play()
-        VerifyBtn.Text = "인증 성공! 불러오는 중..."
-        task.wait(1)
-        LoginGui:Destroy()
-        LoadMainScript()
-    elseif success and cleanResponse == "EXPIRED" then
-        TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(220, 60, 60)}):Play()
-        VerifyBtn.Text = "만료된 라이센스입니다."
-        task.wait(2)
-        TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(50, 100, 255)}):Play()
-        VerifyBtn.Text = "인증하기"
-    elseif success and cleanResponse == "INVALID_USER" then
-        TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(220, 60, 60)}):Play()
-        VerifyBtn.Text = "사용할 수 없는 계정입니다."
-        task.wait(2)
-        TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(50, 100, 255)}):Play()
-        VerifyBtn.Text = "인증하기"
-    else
-        TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(220, 60, 60)}):Play()
-        VerifyBtn.Text = "유효하지 않은 코드입니다."
-        task.wait(2)
-        TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(50, 100, 255)}):Play()
-        VerifyBtn.Text = "인증하기"
-    end
-end)
+LoadMainScript()
