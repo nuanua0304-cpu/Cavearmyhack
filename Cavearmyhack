@@ -1,4 +1,4 @@
-local API_URL = "https://packs-partition-earlier-chen.trycloudflare.com/verify?code=%s&user=%s"
+local API_URL = "https://friend-liable-genetics-throat.trycloudflare.com"
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
