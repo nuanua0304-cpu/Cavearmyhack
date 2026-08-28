@@ -1,0 +1,181 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+if playerGui:FindFirstChild("TextControlGui") then
+    playerGui.TextControlGui:Destroy()
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TextControlGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 360, 0, 360)
+frame.Position = UDim2.new(0.5, -180, 0.5, -180)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = frame
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.fromRGB(60, 60, 70)
+uiStroke.Thickness = 1.5
+uiStroke.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 45)
+title.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+title.TextColor3 = Color3.fromRGB(240, 240, 245)
+title.Text = "전광판 하이엔드 조작기"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.Parent = frame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 12)
+titleCorner.Parent = title
+
+local function createInput(posY, defaultText)
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(0.9, 0, 0, 38)
+    box.Position = UDim2.new(0.05, 0, 0, posY)
+    box.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    box.TextColor3 = Color3.fromRGB(255, 255, 255)
+    box.Text = defaultText
+    box.TextSize = 13
+    box.Font = Enum.Font.Gotham
+    box.ClearTextOnFocus = false
+    box.Parent = frame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = box
+    return box
+end
+
+local box1 = createInput(55, "05일 12시 30분 00초")
+local box2 = createInput(100, "02시간 15분 10초")
+local box3 = createInput(145, "총합 레이더 처치 150 · 주간 레이더 처치 25")
+
+local function createButton(posY, text, color)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.42, 0, 0, 38)
+    btn.Position = UDim2.new(posY == 190 and 0.05 or 0.53, 0, 0, posY)
+    btn.BackgroundColor3 = color
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = text
+    btn.TextSize = 13
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = frame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = btn
+    return btn
+end
+
+local btnRadar1 = createButton(190, "총합 레이더 +1", Color3.fromRGB(80, 80, 100))
+local btnRadar2 = createButton(190, "주간 레이더 +1", Color3.fromRGB(80, 80, 100))
+
+local btnApply = Instance.new("TextButton")
+btnApply.Size = UDim2.new(0.9, 0, 0, 42)
+btnApply.Position = UDim2.new(0.05, 0, 0, 240)
+btnApply.BackgroundColor3 = Color3.fromRGB(0, 130, 255)
+btnApply.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnApply.Text = "텍스트 고정 적용"
+btnApply.TextSize = 14
+btnApply.Font = Enum.Font.GothamBold
+btnApply.Parent = frame
+
+local applyCorner = Instance.new("UICorner")
+applyCorner.CornerRadius = UDim.new(0, 8)
+applyCorner.Parent = btnApply
+
+local isRunning = false
+
+local function parseTime(str)
+    local d, h, m, s = str:match("(%d+)일%s*(%d+)시%s*(%d+)분%s*(%d+)초")
+    if d then return tonumber(d), tonumber(h), tonumber(m), tonumber(s) end
+    local h2, m2, s2 = str:match("(%d+)시간%s*(%d+)분%s*(%d+)초")
+    if h2 then return 0, tonumber(h2), tonumber(m2), tonumber(s2) end
+    return 0, 0, 0, 0
+end
+
+local function formatTime(d, h, m, s, hasDay)
+    if hasDay then
+        return string.format("%02d일 %02d시 %02d분 %02d초", d, h, m, s)
+    else
+        return string.format("%02d시간 %02d분 %02d초", h, m, s)
+    end
+end
+
+local function addRadar(isTotal, amount)
+    local t = box3.Text
+    local total, weekly = t:match("총합 레이더 처치 (%d+) · 주간 레이더 처치 (%d+)")
+    if total and weekly then
+        if isTotal then
+            total = tonumber(total) + amount
+        else
+            weekly = tonumber(weekly) + amount
+        end
+        box3.Text = string.format("총합 레이더 처치 %d · 주간 레이더 처치 %d", total, weekly)
+    end
+end
+
+btnRadar1.MouseButton1Click:Connect(function() addRadar(true, 1) end)
+btnRadar2.MouseButton1Click:Connect(function() addRadar(false, 1) end)
+
+task.spawn(function()
+    while true do
+        task.wait(1)
+        if isRunning then
+            local d1, h1, m1, s1 = parseTime(box1.Text)
+            s1 = s1 + 1
+            if s1 >= 60 then s1 = 0; m1 = m1 + 1 end
+            if m1 >= 60 then m1 = 0; h1 = h1 + 1 end
+            if h1 >= 24 then h1 = 0; d1 = d1 + 1 end
+            box1.Text = formatTime(d1, h1, m1, s1, true)
+
+            local _, h2, m2, s2 = parseTime(box2.Text)
+            s2 = s2 + 1
+            if s2 >= 60 then s2 = 0; m2 = m2 + 1 end
+            if m2 >= 60 then m2 = 0; h2 = h2 + 1 end
+            box2.Text = formatTime(0, h2, m2, s2, false)
+        end
+    end
+end)
+
+btnApply.MouseButton1Click:Connect(function()
+    isRunning = true
+    for _, gui in ipairs(workspace:GetDescendants()) do
+        if gui:IsA("SurfaceGui") then
+            for _, lbl in ipairs(gui:GetDescendants()) do
+                if lbl:IsA("TextLabel") then
+                    if string.find(lbl.Text, "시") and string.find(lbl.Text, "분") and string.find(lbl.Text, "초") and not string.find(lbl.Text, "총합 플레이시간") and not string.find(lbl.Text, "일일 플레이시간") then
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            if isRunning then
+                                if lbl.AbsoluteSize.Y > 40 or (lbl.Parent and string.find(lbl.Parent.Name, "Total")) then
+                                    lbl.Text = box1.Text
+                                else
+                                    lbl.Text = box2.Text
+                                end
+                            end
+                        end)
+                    elseif string.find(lbl.Text, "레이더") then
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            if isRunning then
+                                lbl.Text = box3.Text
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+    end
+end)
