@@ -1,0 +1,410 @@
+local API_URL = "https://friend-liable-genetics-throat.trycloudflare.com"
+
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+local RobloxName = LocalPlayer.Name
+
+local SafeGui = (gethui and gethui()) or CoreGui:FindFirstChild("RobloxGui") or LocalPlayer:WaitForChild("PlayerGui")
+local oldGui = SafeGui:FindFirstChild("HCS_PREMIUM_HUB")
+if oldGui then oldGui:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "HCS_PREMIUM_HUB"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = SafeGui
+
+local tweenInfoFast = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local tweenInfoSmooth = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+local tweenInfoBounce = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+local LoadingFrame = Instance.new("Frame", ScreenGui)
+LoadingFrame.Size = UDim2.new(0, 380, 0, 140)
+LoadingFrame.Position = UDim2.new(0.5, -190, 0.5, -70)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+LoadingFrame.BackgroundTransparency = 1 
+local LCorner = Instance.new("UICorner", LoadingFrame)
+LCorner.CornerRadius = UDim.new(0, 12)
+local LStroke = Instance.new("UIStroke", LoadingFrame)
+LStroke.Color = Color3.fromRGB(40, 40, 50)
+LStroke.Thickness = 1.5
+LStroke.Transparency = 1
+
+local LTitle = Instance.new("TextLabel", LoadingFrame)
+LTitle.Size = UDim2.new(1, 0, 0, 40)
+LTitle.Position = UDim2.new(0, 0, 0, 15)
+LTitle.BackgroundTransparency = 1
+LTitle.Text = "CXH HCS script"
+LTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+LTitle.Font = Enum.Font.GothamBold
+LTitle.TextSize = 22
+LTitle.TextTransparency = 1
+
+local LStatus = Instance.new("TextLabel", LoadingFrame)
+LStatus.Size = UDim2.new(1, 0, 0, 20)
+LStatus.Position = UDim2.new(0, 0, 0.5, -5)
+LStatus.BackgroundTransparency = 1
+LStatus.Text = "보안 서버에 연결 중입니다..."
+LStatus.TextColor3 = Color3.fromRGB(150, 150, 160)
+LStatus.Font = Enum.Font.GothamMedium
+LStatus.TextSize = 13
+LStatus.TextTransparency = 1
+
+local LBarBg = Instance.new("Frame", LoadingFrame)
+LBarBg.Size = UDim2.new(0.85, 0, 0, 6)
+LBarBg.Position = UDim2.new(0.075, 0, 0.75, 0)
+LBarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+LBarBg.BackgroundTransparency = 1
+local LBarBgCorner = Instance.new("UICorner", LBarBg)
+LBarBgCorner.CornerRadius = UDim.new(1, 0)
+
+local LBarFill = Instance.new("Frame", LBarBg)
+LBarFill.Size = UDim2.new(0, 0, 1, 0)
+LBarFill.BackgroundColor3 = Color3.fromRGB(0, 255, 128)
+local LBarFillCorner = Instance.new("UICorner", LBarFill)
+LBarFillCorner.CornerRadius = UDim.new(1, 0)
+
+TweenService:Create(LoadingFrame, tweenInfoSmooth, {BackgroundTransparency = 0.1}):Play()
+TweenService:Create(LStroke, tweenInfoSmooth, {Transparency = 0}):Play()
+TweenService:Create(LTitle, tweenInfoSmooth, {TextTransparency = 0}):Play()
+TweenService:Create(LStatus, tweenInfoSmooth, {TextTransparency = 0}):Play()
+TweenService:Create(LBarBg, tweenInfoSmooth, {BackgroundTransparency = 0}):Play()
+
+TweenService:Create(LBarFill, TweenInfo.new(2.5, Enum.EasingStyle.Sine), {Size = UDim2.new(1, 0, 1, 0)}):Play()
+task.wait(1)
+
+local success, result = pcall(function()
+    return game:HttpGet(API_URL .. "/api/hub?roblox=" .. RobloxName, true)
+end)
+
+if not success then
+    LStatus.Text = "서버 통신 오류! API 주소를 확인하세요."
+    LStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+    task.wait(3)
+    ScreenGui:Destroy()
+    return
+end
+
+local data = HttpService:JSONDecode(result)
+if not data.success then
+    LStatus.Text = "등록된 라이센스/구매 내역이 없습니다."
+    LStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+    task.wait(2)
+    ScreenGui:Destroy()
+    return
+end
+
+LStatus.Text = "데이터 로드 완료. UI를 구성합니다."
+LStatus.TextColor3 = Color3.fromRGB(0, 255, 128)
+task.wait(0.5)
+LoadingFrame:Destroy()
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 640, 0, 380)
+MainFrame.Position = UDim2.new(0.5, -320, 0.5, -180) 
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 15)
+MainFrame.BackgroundTransparency = 0.05
+MainFrame.ClipsDescendants = true
+local MCorner = Instance.new("UICorner", MainFrame)
+MCorner.CornerRadius = UDim.new(0, 14)
+local MStroke = Instance.new("UIStroke", MainFrame)
+MStroke.Color = Color3.fromRGB(45, 45, 55)
+MStroke.Thickness = 1.5
+
+MainFrame.Size = UDim2.new(0, 600, 0, 350)
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -175)
+MainFrame.BackgroundTransparency = 1
+TweenService:Create(MainFrame, tweenInfoBounce, {Size = UDim2.new(0, 640, 0, 380), Position = UDim2.new(0.5, -320, 0.5, -190), BackgroundTransparency = 0.05}):Play()
+
+local LeftNav = Instance.new("Frame", MainFrame)
+LeftNav.Size = UDim2.new(0, 170, 1, 0)
+LeftNav.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+LeftNav.BorderSizePixel = 0
+local LNavCorner = Instance.new("UICorner", LeftNav)
+LNavCorner.CornerRadius = UDim.new(0, 14)
+
+local NavTitle = Instance.new("TextLabel", LeftNav)
+NavTitle.Size = UDim2.new(1, 0, 0, 70)
+NavTitle.BackgroundTransparency = 1
+NavTitle.Text = "HCS SCRIPT"
+NavTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+NavTitle.Font = Enum.Font.GothamBold
+NavTitle.TextSize = 16
+
+local ScrollNav = Instance.new("ScrollingFrame", LeftNav)
+ScrollNav.Size = UDim2.new(1, 0, 1, -120)
+ScrollNav.Position = UDim2.new(0, 0, 0, 70)
+ScrollNav.BackgroundTransparency = 1
+ScrollNav.ScrollBarThickness = 2
+ScrollNav.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 70)
+local UIListLayout = Instance.new("UIListLayout", ScrollNav)
+UIListLayout.Padding = UDim.new(0, 6)
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local RightPanel = Instance.new("Frame", MainFrame)
+RightPanel.Size = UDim2.new(0, 170, 1, 0)
+RightPanel.Position = UDim2.new(1, -170, 0, 0)
+RightPanel.BackgroundColor3 = Color3.fromRGB(8, 8, 10)
+local RCorner = Instance.new("UICorner", RightPanel)
+RCorner.CornerRadius = UDim.new(0, 14)
+local RLine = Instance.new("Frame", RightPanel)
+RLine.Size = UDim2.new(0, 1, 1, 0)
+RLine.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+RLine.BorderSizePixel = 0
+
+local PfpFrame = Instance.new("Frame", RightPanel)
+PfpFrame.Size = UDim2.new(0, 90, 0, 90)
+PfpFrame.Position = UDim2.new(0.5, -45, 0, 40)
+PfpFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+local PfpCorner = Instance.new("UICorner", PfpFrame)
+PfpCorner.CornerRadius = UDim.new(1, 0)
+local PfpStroke = Instance.new("UIStroke", PfpFrame)
+PfpStroke.Color = Color3.fromRGB(60, 60, 75)
+PfpStroke.Thickness = 2
+
+local PfpImage = Instance.new("ImageLabel", PfpFrame)
+PfpImage.Size = UDim2.new(1, 0, 1, 0)
+PfpImage.BackgroundTransparency = 1
+PfpImage.Image = "rbxassetid://0"
+local PfpImageCorner = Instance.new("UICorner", PfpImage)
+PfpImageCorner.CornerRadius = UDim.new(1, 0)
+
+task.spawn(function()
+    if data.discordPfp and data.discordPfp ~= "" then
+        local s, imgData = pcall(function() return game:HttpGet(data.discordPfp) end)
+        if s and imgData then
+            if writefile and getcustomasset then
+                writefile("hcs_profile.png", imgData)
+                PfpImage.Image = getcustomasset("hcs_profile.png")
+            end
+        end
+    end
+end)
+
+local NameLabel = Instance.new("TextLabel", RightPanel)
+NameLabel.Size = UDim2.new(1, 0, 0, 40)
+NameLabel.Position = UDim2.new(0, 0, 0, 145)
+NameLabel.BackgroundTransparency = 1
+NameLabel.Text = "<font color='rgb(150,150,160)'>@" .. data.robloxName .. "</font>\n" .. data.discordName
+NameLabel.RichText = true
+NameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+NameLabel.Font = Enum.Font.GothamBold
+NameLabel.TextSize = 13
+
+local RightHubText = Instance.new("TextLabel", RightPanel)
+RightHubText.Size = UDim2.new(1, 0, 0, 40)
+RightHubText.Position = UDim2.new(0, 0, 1, -50)
+RightHubText.BackgroundTransparency = 1
+RightHubText.Text = "CXH HCS script"
+RightHubText.TextColor3 = Color3.fromRGB(0, 255, 128)
+RightHubText.Font = Enum.Font.GothamBlack
+RightHubText.TextSize = 14
+
+local CenterPanel = Instance.new("Frame", MainFrame)
+CenterPanel.Size = UDim2.new(1, -340, 1, 0)
+CenterPanel.Position = UDim2.new(0, 170, 0, 0)
+CenterPanel.BackgroundTransparency = 1
+
+local ProductTitle = Instance.new("TextLabel", CenterPanel)
+ProductTitle.Size = UDim2.new(1, -40, 0, 40)
+ProductTitle.Position = UDim2.new(0, 30, 0, 30)
+ProductTitle.BackgroundTransparency = 1
+ProductTitle.Text = "환영합니다"
+ProductTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+ProductTitle.TextXAlignment = Enum.TextXAlignment.Left
+ProductTitle.Font = Enum.Font.GothamBlack
+ProductTitle.TextSize = 26
+
+local ProductDesc = Instance.new("TextLabel", CenterPanel)
+ProductDesc.Size = UDim2.new(1, -40, 0, 80)
+ProductDesc.Position = UDim2.new(0, 30, 0, 75)
+ProductDesc.BackgroundTransparency = 1
+ProductDesc.Text = "왼쪽 탭에서 보유중인\n제품을 선택해주세요."
+ProductDesc.TextColor3 = Color3.fromRGB(170, 170, 180)
+ProductDesc.TextXAlignment = Enum.TextXAlignment.Left
+ProductDesc.TextYAlignment = Enum.TextYAlignment.Top
+ProductDesc.Font = Enum.Font.GothamMedium
+ProductDesc.TextSize = 15
+
+local StartBtn = Instance.new("TextButton", CenterPanel)
+StartBtn.Size = UDim2.new(0, 220, 0, 50)
+StartBtn.Position = UDim2.new(0.5, -110, 1, -80)
+StartBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 128)
+StartBtn.Text = "시작하기"
+StartBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+StartBtn.Font = Enum.Font.GothamBlack
+StartBtn.TextSize = 16
+StartBtn.Visible = false
+local SBtnCorner = Instance.new("UICorner", StartBtn)
+SBtnCorner.CornerRadius = UDim.new(0, 8)
+local SBtnStroke = Instance.new("UIStroke", StartBtn)
+SBtnStroke.Color = Color3.fromRGB(150, 255, 200)
+SBtnStroke.Thickness = 1
+SBtnStroke.Transparency = 0.5
+
+StartBtn.MouseEnter:Connect(function()
+    TweenService:Create(StartBtn, tweenInfoFast, {Size = UDim2.new(0, 225, 0, 53), Position = UDim2.new(0.5, -112.5, 1, -81.5), BackgroundColor3 = Color3.fromRGB(50, 255, 150)}):Play()
+end)
+StartBtn.MouseLeave:Connect(function()
+    TweenService:Create(StartBtn, tweenInfoFast, {Size = UDim2.new(0, 220, 0, 50), Position = UDim2.new(0.5, -110, 1, -80), BackgroundColor3 = Color3.fromRGB(0, 255, 128)}):Play()
+end)
+StartBtn.MouseButton1Down:Connect(function()
+    TweenService:Create(StartBtn, tweenInfoFast, {Size = UDim2.new(0, 210, 0, 47), Position = UDim2.new(0.5, -105, 1, -78.5)}):Play()
+end)
+StartBtn.MouseButton1Up:Connect(function()
+    TweenService:Create(StartBtn, tweenInfoBounce, {Size = UDim2.new(0, 225, 0, 53), Position = UDim2.new(0.5, -112.5, 1, -81.5)}):Play()
+end)
+
+local productNames = {
+    pcv1 = "동굴부대 PC V1",
+    pcv2 = "동굴부대 PC V2",
+    mov1 = "동굴부대 모바일 V1",
+    mov2 = "동굴부대 모바일 V2"
+}
+
+local selectedProductId = nil
+local buttons = {}
+
+for _, pId in ipairs(data.products) do
+    local btn = Instance.new("TextButton", ScrollNav)
+    btn.Size = UDim2.new(1, -20, 0, 42)
+    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    btn.Text = "    " .. (productNames[pId] or pId)
+    btn.TextColor3 = Color3.fromRGB(200, 200, 210)
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextSize = 13
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.BorderSizePixel = 0
+    local BtnCorner = Instance.new("UICorner", btn)
+    BtnCorner.CornerRadius = UDim.new(0, 8)
+    
+    local highlight = Instance.new("Frame", btn)
+    highlight.Size = UDim2.new(0, 4, 0.5, 0)
+    highlight.Position = UDim2.new(0, 0, 0.25, 0)
+    highlight.BackgroundColor3 = Color3.fromRGB(0, 255, 128)
+    highlight.BorderSizePixel = 0
+    highlight.BackgroundTransparency = 1
+    local hlCorner = Instance.new("UICorner", highlight)
+    hlCorner.CornerRadius = UDim.new(1, 0)
+    
+    buttons[pId] = { button = btn, line = highlight }
+
+    btn.MouseEnter:Connect(function()
+        if selectedProductId ~= pId then
+            TweenService:Create(btn, tweenInfoFast, {BackgroundColor3 = Color3.fromRGB(35, 35, 45), TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+        end
+    end)
+    btn.MouseLeave:Connect(function()
+        if selectedProductId ~= pId then
+            TweenService:Create(btn, tweenInfoFast, {BackgroundColor3 = Color3.fromRGB(25, 25, 30), TextColor3 = Color3.fromRGB(200, 200, 210)}):Play()
+        end
+    end)
+
+    btn.MouseButton1Click:Connect(function()
+        for _, b in pairs(buttons) do
+            TweenService:Create(b.button, tweenInfoFast, {BackgroundColor3 = Color3.fromRGB(25, 25, 30), TextColor3 = Color3.fromRGB(200, 200, 210)}):Play()
+            TweenService:Create(b.line, tweenInfoFast, {BackgroundTransparency = 1, Size = UDim2.new(0, 4, 0.5, 0), Position = UDim2.new(0, 0, 0.25, 0)}):Play()
+        end
+        
+        TweenService:Create(btn, tweenInfoFast, {BackgroundColor3 = Color3.fromRGB(40, 40, 50), TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+        TweenService:Create(highlight, tweenInfoBounce, {BackgroundTransparency = 0, Size = UDim2.new(0, 4, 0.8, 0), Position = UDim2.new(0, 0, 0.1, 0)}):Play()
+        
+        selectedProductId = pId
+        
+        TweenService:Create(ProductTitle, tweenInfoFast, {TextTransparency = 1}):Play()
+        TweenService:Create(ProductDesc, tweenInfoFast, {TextTransparency = 1}):Play()
+        task.wait(0.15)
+        ProductTitle.Text = productNames[pId]
+        ProductDesc.Text = "<font color='rgb(255,255,255)'>선택 완료.</font>\n하단의 시작하기 버튼을 눌러 스크립트를 구동하세요."
+        ProductDesc.RichText = true
+        TweenService:Create(ProductTitle, tweenInfoFast, {TextTransparency = 0}):Play()
+        TweenService:Create(ProductDesc, tweenInfoFast, {TextTransparency = 0}):Play()
+        
+        StartBtn.Visible = true
+        StartBtn.Size = UDim2.new(0, 200, 0, 45)
+        StartBtn.Position = UDim2.new(0.5, -100, 1, -75)
+        StartBtn.BackgroundTransparency = 1
+        StartBtn.TextTransparency = 1
+        TweenService:Create(StartBtn, tweenInfoBounce, {Size = UDim2.new(0, 220, 0, 50), Position = UDim2.new(0.5, -110, 1, -80), BackgroundTransparency = 0, TextTransparency = 0}):Play()
+    end)
+end
+
+local dragging, dragInput, dragStart, startPos
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+MainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+StartBtn.MouseButton1Click:Connect(function()
+    if not selectedProductId then return end
+    StartBtn.Text = "로딩 중..."
+    
+    local fetchUrl = API_URL .. "/api/script?roblox=" .. RobloxName .. "&product=" .. selectedProductId
+    local s, scriptBody = pcall(function() return game:HttpGet(fetchUrl, true) end)
+    
+    if s and scriptBody and scriptBody ~= "" then
+        TweenService:Create(MainFrame, tweenInfoSmooth, {Size = UDim2.new(0, 600, 0, 350), Position = UDim2.new(0.5, -300, 0.5, -175), BackgroundTransparency = 1}):Play()
+        
+        for _, obj in pairs(MainFrame:GetDescendants()) do
+            local props = {}
+            if obj:IsA("TextLabel") or obj:IsA("TextButton") then 
+                props.TextTransparency = 1 
+                props.BackgroundTransparency = 1
+            elseif obj:IsA("ImageLabel") then 
+                props.ImageTransparency = 1 
+                props.BackgroundTransparency = 1
+            elseif obj:IsA("ScrollingFrame") then 
+                props.ScrollBarImageTransparency = 1 
+                props.BackgroundTransparency = 1
+            elseif obj:IsA("Frame") then
+                props.BackgroundTransparency = 1
+            elseif obj:IsA("UIStroke") then 
+                props.Transparency = 1 
+            end
+            
+            local hasProps = false
+            for k, v in pairs(props) do hasProps = true break end
+            
+            if hasProps then
+                TweenService:Create(obj, tweenInfoFast, props):Play()
+            end
+        end
+        
+        task.wait(0.4)
+        ScreenGui:Destroy() 
+        
+        local loadFunc, loadErr = loadstring(scriptBody)
+        if loadFunc then
+            loadFunc()
+        else
+            warn("스크립트 실행 에러: " .. tostring(loadErr))
+        end
+    else
+        StartBtn.Text = "불러오기 실패"
+        StartBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+        task.wait(1.5)
+        StartBtn.Text = "시작하기"
+        StartBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 128)
+    end
+end)
