@@ -1,4 +1,4 @@
-local API_URL = "https://friend-liable-genetics-throat.trycloudflare.com"
+local API_URL = "https://brighton-unlikely-unsigned-italia.trycloudflare.com"
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
