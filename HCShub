@@ -103,7 +103,7 @@ LoadingFrame:Destroy()
 
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 640, 0, 380)
-MainFrame.Position = UDim2.new(0.5, -320, 0.5, -180) 
+MainFrame.Position = UDim2.new(0.5, -320, 0.5, -190) 
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 15)
 MainFrame.BackgroundTransparency = 0.05
 MainFrame.ClipsDescendants = true
