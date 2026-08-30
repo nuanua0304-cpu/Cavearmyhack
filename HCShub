@@ -1,4 +1,4 @@
-local API_URL = "https://wheat-calculators-operations-julie.trycloudflare.com"
+local API_URL = "https://hcshub3000.loca.lt"
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
