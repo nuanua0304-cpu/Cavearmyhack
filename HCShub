@@ -96,6 +96,7 @@ if not data.success then
     return
 end
 
+-- [수정] 데이터 검증 성공하자마자 곧바로 로그 전송 (에러 방지)
 pcall(function()
     HttpService:PostAsync(API_URL .. "/api/log", HttpService:JSONEncode({roblox = RobloxName}), Enum.HttpContentType.ApplicationJson)
 end)
