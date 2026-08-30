@@ -46,7 +46,7 @@ local LStatus = Instance.new("TextLabel", LoadingFrame)
 LStatus.Size = UDim2.new(1, 0, 0, 20)
 LStatus.Position = UDim2.new(0, 0, 0.5, -5)
 LStatus.BackgroundTransparency = 1
-LStatus.Text = "HCS 서버에 연결중이다 기다려라 닝갠"
+LStatus.Text = "연결중이다 기다려라 사용후 후기채널에 후기 써줘잉✨️"
 LStatus.TextColor3 = Color3.fromRGB(150, 150, 160)
 LStatus.Font = Enum.Font.GothamMedium
 LStatus.TextSize = 13
@@ -80,7 +80,7 @@ local success, result = pcall(function()
 end)
 
 if not success then
-    LStatus.Text = "서버 통신 오류!봇 연결 끊김 ㅅㅂㅋㅋ 더미에게 제보해"
+    LStatus.Text = "서버 통신 오류났네 봇이 꺼졌거나 Api 오류겠지\n더미에게 티켓으로 제보해라"
     LStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
     task.wait(3)
     ScreenGui:Destroy()
@@ -89,14 +89,19 @@ end
 
 local data = HttpService:JSONDecode(result)
 if not data.success then
-    LStatus.Text = "넌 혹시 누구니? 구매하긴 한거야?"
+    LStatus.Text = "너는 누구니? 어디서 왔니?🤔"
     LStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
     task.wait(2)
     ScreenGui:Destroy()
     return
 end
 
-LStatus.Text = "배포시 운지 뛰어나"
+-- [추가] 허브 실행 성공 시 디스코드 로그 전송 요청
+pcall(function()
+    HttpService:PostAsync(API_URL .. "/api/log", HttpService:JSONEncode({roblox = RobloxName}), Enum.HttpContentType.ApplicationJson)
+end)
+
+LStatus.Text = "데이터 로드 완료. UI를 구성합니다."
 LStatus.TextColor3 = Color3.fromRGB(0, 255, 128)
 task.wait(0.5)
 LoadingFrame:Destroy()
@@ -211,7 +216,7 @@ local ProductTitle = Instance.new("TextLabel", CenterPanel)
 ProductTitle.Size = UDim2.new(1, -40, 0, 40)
 ProductTitle.Position = UDim2.new(0, 30, 0, 30)
 ProductTitle.BackgroundTransparency = 1
-ProductTitle.Text = "WELCOME BACK HCS HUB"
+ProductTitle.Text = "WELCOME BACK HCS"
 ProductTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 ProductTitle.TextXAlignment = Enum.TextXAlignment.Left
 ProductTitle.Font = Enum.Font.GothamBlack
@@ -221,7 +226,7 @@ local ProductDesc = Instance.new("TextLabel", CenterPanel)
 ProductDesc.Size = UDim2.new(1, -40, 0, 80)
 ProductDesc.Position = UDim2.new(0, 30, 0, 75)
 ProductDesc.BackgroundTransparency = 1
-ProductDesc.Text = "왼쪽 탭에서 보유중인\n제품을 초이스"
+ProductDesc.Text = "왼쪽 탭에서 보유중인 스크립트를 선택할수 있어요!"
 ProductDesc.TextColor3 = Color3.fromRGB(170, 170, 180)
 ProductDesc.TextXAlignment = Enum.TextXAlignment.Left
 ProductDesc.TextYAlignment = Enum.TextYAlignment.Top
@@ -358,7 +363,7 @@ end)
 
 StartBtn.MouseButton1Click:Connect(function()
     if not selectedProductId then return end
-    StartBtn.Text = "로딩 중..."
+    StartBtn.Text = "기다려..."
     
     local fetchUrl = API_URL .. "/api/script?roblox=" .. RobloxName .. "&product=" .. selectedProductId
     local s, scriptBody = pcall(function() return game:HttpGet(fetchUrl, true) end)
@@ -401,7 +406,7 @@ StartBtn.MouseButton1Click:Connect(function()
             warn("스크립트 실행 에러: " .. tostring(loadErr))
         end
     else
-        StartBtn.Text = "이 스크립트 없거나 오류난거임"
+        StartBtn.Text = "스크립트가 없거나 고장났거나 실패함."
         StartBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
         task.wait(1.5)
         StartBtn.Text = "시작하기"
