@@ -1,4 +1,4 @@
-local API_URL = "https://hcshub3000.loca.lt"
+local API_URL = "https://hcshub-server.youluckbici2025.workers.dev/](https://hcshub-server.youluckbici2025.workers.dev/)"
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
