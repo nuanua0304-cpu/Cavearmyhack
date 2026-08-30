@@ -96,11 +96,6 @@ if not data.success then
     return
 end
 
--- [수정] 데이터 검증 성공하자마자 곧바로 로그 전송 (에러 방지)
-pcall(function()
-    HttpService:PostAsync(API_URL .. "/api/log", HttpService:JSONEncode({roblox = RobloxName}), Enum.HttpContentType.ApplicationJson)
-end)
-
 LStatus.Text = "데이터 로드 완료. UI를 구성합니다."
 LStatus.TextColor3 = Color3.fromRGB(0, 255, 128)
 task.wait(0.5)
@@ -361,9 +356,15 @@ MainFrame.InputEnded:Connect(function(input)
     end
 end)
 
+-- [수정] 시작하기 버튼을 누를 때 디스코드 로그 전송 요청 발사!
 StartBtn.MouseButton1Click:Connect(function()
     if not selectedProductId then return end
     StartBtn.Text = "기다려..."
+    
+    -- 버튼 누를 때 로그 전송 요청 (GET 방식)
+    pcall(function()
+        game:HttpGet(API_URL .. "/api/log?roblox=" .. RobloxName, true)
+    end)
     
     local fetchUrl = API_URL .. "/api/script?roblox=" .. RobloxName .. "&product=" .. selectedProductId
     local s, scriptBody = pcall(function() return game:HttpGet(fetchUrl, true) end)
