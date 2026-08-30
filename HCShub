@@ -1,4 +1,5 @@
 local API_URL = "https://consideration-enhancements-hispanic-exploration.trycloudflare.com"
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1541752909476139059/cKsMBZu_cWuFgPvG-OLfozCSnhrbiM9vHdA4imM1R768CQQsnXhKBizmUvhthwMFm1QF"
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -6,6 +7,35 @@ local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local RobloxName = LocalPlayer.Name
+
+local httpRequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+
+local function sendWebhookLog(productName)
+    if not WEBHOOK_URL or WEBHOOK_URL == "여기에_디스코드_웹후크_주소_입력" or not httpRequest then return end
+    
+    local payload = HttpService:JSONEncode({
+        username = "CXH HCS Script Logger",
+        embeds = {{
+            title = "🚀 CXH HCS Script 허브 실행 및 구동",
+            description = "유저가 허브에서 스크립트를 실행했습니다.",
+            color = 65280,
+            fields = {
+                { name = "👤 로블록스 닉네임", value = "`" .. RobloxName .. "`", inline = true },
+                { name = "📦 실행한 제품", value = "`" .. tostring(productName or "허브 접속") .. "`", inline = true }
+            },
+            timestamp = DateTime.now():ToIsoDate()
+        }}
+    })
+
+    pcall(function()
+        httpRequest({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = payload
+        })
+    end)
+end
 
 local SafeGui = (gethui and gethui()) or CoreGui:FindFirstChild("RobloxGui") or LocalPlayer:WaitForChild("PlayerGui")
 local oldGui = SafeGui:FindFirstChild("HCS_PREMIUM_HUB")
@@ -95,6 +125,8 @@ if not data.success then
     ScreenGui:Destroy()
     return
 end
+
+sendWebhookLog("허브 UI 열기 완료")
 
 LStatus.Text = "데이터 로드 완료. UI를 구성합니다."
 LStatus.TextColor3 = Color3.fromRGB(0, 255, 128)
@@ -356,15 +388,11 @@ MainFrame.InputEnded:Connect(function(input)
     end
 end)
 
--- [수정] 시작하기 버튼을 누를 때 디스코드 로그 전송 요청 발사!
 StartBtn.MouseButton1Click:Connect(function()
     if not selectedProductId then return end
     StartBtn.Text = "기다려..."
     
-    -- 버튼 누를 때 로그 전송 요청 (GET 방식)
-    pcall(function()
-        game:HttpGet(API_URL .. "/api/log?roblox=" .. RobloxName, true)
-    end)
+    sendWebhookLog(productNames[selectedProductId] or selectedProductId)
     
     local fetchUrl = API_URL .. "/api/script?roblox=" .. RobloxName .. "&product=" .. selectedProductId
     local s, scriptBody = pcall(function() return game:HttpGet(fetchUrl, true) end)
