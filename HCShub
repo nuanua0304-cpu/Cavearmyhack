@@ -1,4 +1,4 @@
-local API_URL = "https://brighton-unlikely-unsigned-italia.trycloudflare.com"
+local API_URL = "https://consideration-enhancements-hispanic-exploration.trycloudflare.com"
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -12,7 +12,7 @@ local oldGui = SafeGui:FindFirstChild("HCS_PREMIUM_HUB")
 if oldGui then oldGui:Destroy() end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HCS_PREMIUM_HUB"
+ScreenGui.Name = "HCS HUB"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = SafeGui
 
@@ -46,7 +46,7 @@ local LStatus = Instance.new("TextLabel", LoadingFrame)
 LStatus.Size = UDim2.new(1, 0, 0, 20)
 LStatus.Position = UDim2.new(0, 0, 0.5, -5)
 LStatus.BackgroundTransparency = 1
-LStatus.Text = "보안 서버에 연결 중입니다..."
+LStatus.Text = "HCS 서버에 연결중이다 기다려라 닝갠"
 LStatus.TextColor3 = Color3.fromRGB(150, 150, 160)
 LStatus.Font = Enum.Font.GothamMedium
 LStatus.TextSize = 13
@@ -80,7 +80,7 @@ local success, result = pcall(function()
 end)
 
 if not success then
-    LStatus.Text = "서버 통신 오류! API 주소를 확인하세요."
+    LStatus.Text = "서버 통신 오류!봇 연결 끊김 ㅅㅂㅋㅋ 더미에게 제보해"
     LStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
     task.wait(3)
     ScreenGui:Destroy()
@@ -89,21 +89,21 @@ end
 
 local data = HttpService:JSONDecode(result)
 if not data.success then
-    LStatus.Text = "등록된 라이센스/구매 내역이 없습니다."
+    LStatus.Text = "넌 혹시 누구니? 구매하긴 한거야?"
     LStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
     task.wait(2)
     ScreenGui:Destroy()
     return
 end
 
-LStatus.Text = "데이터 로드 완료. UI를 구성합니다."
+LStatus.Text = "배포시 운지 뛰어나"
 LStatus.TextColor3 = Color3.fromRGB(0, 255, 128)
 task.wait(0.5)
 LoadingFrame:Destroy()
 
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 640, 0, 380)
-MainFrame.Position = UDim2.new(0.5, -320, 0.5, -190) 
+MainFrame.Position = UDim2.new(0.5, -320, 0.5, -180) 
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 15)
 MainFrame.BackgroundTransparency = 0.05
 MainFrame.ClipsDescendants = true
@@ -211,7 +211,7 @@ local ProductTitle = Instance.new("TextLabel", CenterPanel)
 ProductTitle.Size = UDim2.new(1, -40, 0, 40)
 ProductTitle.Position = UDim2.new(0, 30, 0, 30)
 ProductTitle.BackgroundTransparency = 1
-ProductTitle.Text = "환영합니다"
+ProductTitle.Text = "WELCOME BACK HCS HUB"
 ProductTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 ProductTitle.TextXAlignment = Enum.TextXAlignment.Left
 ProductTitle.Font = Enum.Font.GothamBlack
@@ -221,7 +221,7 @@ local ProductDesc = Instance.new("TextLabel", CenterPanel)
 ProductDesc.Size = UDim2.new(1, -40, 0, 80)
 ProductDesc.Position = UDim2.new(0, 30, 0, 75)
 ProductDesc.BackgroundTransparency = 1
-ProductDesc.Text = "왼쪽 탭에서 보유중인\n제품을 선택해주세요."
+ProductDesc.Text = "왼쪽 탭에서 보유중인\n제품을 초이스"
 ProductDesc.TextColor3 = Color3.fromRGB(170, 170, 180)
 ProductDesc.TextXAlignment = Enum.TextXAlignment.Left
 ProductDesc.TextYAlignment = Enum.TextYAlignment.Top
@@ -401,7 +401,7 @@ StartBtn.MouseButton1Click:Connect(function()
             warn("스크립트 실행 에러: " .. tostring(loadErr))
         end
     else
-        StartBtn.Text = "불러오기 실패"
+        StartBtn.Text = "이 스크립트 없거나 오류난거임"
         StartBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
         task.wait(1.5)
         StartBtn.Text = "시작하기"
