@@ -1,4 +1,4 @@
-local API_URL = "https://hcshub3000.loca.lt"
+local API_URL = "https://breath-job-malpractice-sound.trycloudflare.com"
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
