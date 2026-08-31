@@ -1,4 +1,4 @@
-local API_URL = "https://seafood-www-opposition-consideration.trycloudflare.com"
+local API_URL = "https://residents-kick-eng-psp.trycloudflare.com"
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
