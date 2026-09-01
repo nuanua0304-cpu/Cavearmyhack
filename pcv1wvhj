@@ -368,7 +368,7 @@ addToggle("즉사 데미지", function(v) damageEnabled = v end)
 addToggle("히트박스", function(v) hitboxEnabled = v end)
 addToggle("위치 표시 ESP", function(v) espEnabled = v; for _, hl in pairs(espObjects) do if hl then hl.Enabled = v end end end)
 addToggle("Noclip (벽통과)", function(v) noclipEnabled = v end)
-addToggle("이거뭐옄ㅅ지", function(v) AntiArrestEnabled = v end)
+addToggle("삭제된기능", function(v) AntiArrestEnabled = v end)
 
 addButton("전역소 가기 [이동]", function()
     local char = LocalPlayer.Character
