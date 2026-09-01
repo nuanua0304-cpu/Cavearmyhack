@@ -113,8 +113,8 @@ local fadeInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.
 
 local notices = {
     "⚠️ 본 스크립트를 불법 배포시 처벌받습니다.",
-    "⚠️ 계정이 밴이 될수 있으니 조심해 사용해 주세요.",
-    "💖 디스코드 사용하시고 리뷰를 남겨주세요!"
+    "⚠️ 계정이 밴이 될수 있으니 조심히 사용해 주세요.",
+    "💖 사용하시고 디스코드에 후기를 남겨주세요!"
 }
 
 TweenService:Create(TopBar, fadeInfo, {BackgroundTransparency = 0.45}):Play()
