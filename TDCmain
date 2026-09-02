@@ -1,5 +1,4 @@
 local Players = game:GetService("Players")
-local Teams = game:GetService("Teams")
 local player = Players.LocalPlayer
 
 if player.PlayerGui:FindFirstChild("StatusCloneGui") then
@@ -24,7 +23,7 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = player.PlayerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 430, 0, 340)
+frame.Size = UDim2.new(0, 430, 0, 290)
 frame.Position = UDim2.new(0.5, -215, 0.1, 0)
 frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 frame.BorderSizePixel = 0
@@ -65,7 +64,7 @@ end)
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundTransparency = 1
-title.Text = "좌표 고정 클론 및 팀 시스템 연동기"
+title.Text = "좌표 고정 클론 및 상태 관리기"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 14
 title.Font = Enum.Font.GothamBold
@@ -288,65 +287,3 @@ end
 for i = 1, 6 do
     createCloneRow(i, 75 + (i - 1) * 35)
 end
-
-local teamLabel = Instance.new("TextLabel")
-teamLabel.Size = UDim2.new(1, -20, 0, 20)
-teamLabel.Position = UDim2.new(0, 10, 0, 285)
-teamLabel.BackgroundTransparency = 1
-teamLabel.Text = "우측 원본 팀 시스템 연동 버튼"
-teamLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-teamLabel.TextSize = 11
-teamLabel.Font = Enum.Font.GothamBold
-teamLabel.TextXAlignment = Enum.TextXAlignment.Left
-teamLabel.Parent = frame
-
-local function updateTeamButtons()
-    local teamsList = Teams:GetTeams()
-    local buttonWidth = (410 / math.max(#teamsList, 1)) - 5
-    
-    for i, team in ipairs(teamsList) do
-        local teamBtn = Instance.new("TextButton")
-        teamBtn.Size = UDim2.new(0, buttonWidth, 0, 24)
-        teamBtn.Position = UDim2.new(0, 10 + (i - 1) * (buttonWidth + 5), 0, 308)
-        teamBtn.BackgroundColor3 = team.TeamColor.Color
-        teamBtn.BorderSizePixel = 0
-        teamBtn.Text = team.Name
-        teamBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        teamBtn.TextSize = 11
-        teamBtn.Font = Enum.Font.GothamBold
-        teamBtn.Parent = frame
-        
-        local bCorner = Instance.new("UICorner")
-        bCorner.CornerRadius = UDim.new(0, 4)
-        bCorner.Parent = teamBtn
-        
-        teamBtn.MouseButton1Click:Connect(function()
-            pcall(function()
-                for _, gui in ipairs(player.PlayerGui:GetDescendants()) do
-                    if gui:IsA("TextButton") or gui:IsA("TextLabel") or gui:IsA("ImageButton") then
-                        if gui.Text == team.Name or gui.Name == team.Name then
-                            local target = gui
-                            if not target:IsA("TextButton") and not target:IsA("ImageButton") and target.Parent and (target.Parent:IsA("TextButton") or target.Parent:IsA("ImageButton")) then
-                                target = target.Parent
-                            end
-                            
-                            if target and (target:IsA("TextButton") or target:IsA("ImageButton")) then
-                                for _, conn in ipairs(getconnections(target.MouseButton1Click)) do
-                                    conn:Fire()
-                                end
-                                for _, conn in ipairs(getconnections(target.MouseButton1Down)) do
-                                    conn:Fire()
-                                end
-                                for _, conn in ipairs(getconnections(target.Activated)) do
-                                    conn:Fire()
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        end)
-    end
-end
-
-updateTeamButtons()
