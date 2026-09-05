@@ -1,0 +1,328 @@
+local player = game.Players.LocalPlayer
+
+local playerGui = player:WaitForChild("PlayerGui")
+
+
+if playerGui:FindFirstChild("TextControlGui") then
+
+    playerGui.TextControlGui:Destroy()
+
+end
+
+
+local screenGui = Instance.new("ScreenGui")
+
+screenGui.Name = "TextControlGui"
+
+screenGui.ResetOnSpawn = false
+
+screenGui.Parent = playerGui
+
+
+local frame = Instance.new("Frame")
+
+frame.Size = UDim2.new(0, 380, 0, 280)
+
+frame.Position = UDim2.new(0.5, -190, 0.5, -140)
+
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+
+frame.BorderSizePixel = 0
+
+frame.Active = true
+
+frame.Draggable = true
+
+frame.Parent = screenGui
+
+
+local uiCorner = Instance.new("UICorner")
+
+uiCorner.CornerRadius = UDim.new(0, 12)
+
+uiCorner.Parent = frame
+
+
+local uiStroke = Instance.new("UIStroke")
+
+uiStroke.Color = Color3.fromRGB(60, 60, 70)
+
+uiStroke.Thickness = 1.5
+
+uiStroke.Parent = frame
+
+
+local title = Instance.new("TextLabel")
+
+title.Size = UDim2.new(1, 0, 0, 40)
+
+title.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+
+title.TextColor3 = Color3.fromRGB(240, 240, 245)
+
+title.Text = "전광판 버튼 고정 조작기"
+
+title.Font = Enum.Font.GothamBold
+
+title.TextSize = 15
+
+title.Parent = frame
+
+
+local titleCorner = Instance.new("UICorner")
+
+titleCorner.CornerRadius = UDim.new(0, 12)
+
+titleCorner.Parent = title
+
+
+local timeData = {
+
+    d1 = 0, h1 = 0, m1 = 0, s1 = 0,
+
+    h2 = 0, m2 = 0, s2 = 0,
+
+    radarTotal = 0,
+
+    radarWeekly = 0
+
+}
+
+
+local activeLock = false
+
+
+local function startLockLoop()
+
+    if activeLock then return end
+
+    activeLock = true
+
+
+    game:GetService("RunService").RenderStepped:Connect(function()
+
+        local text1 = string.format("%02d일 %02d시 %02d분 %02d초", timeData.d1, timeData.h1, timeData.m1, timeData.s1)
+
+        -- 일일 플레이시간 형식이 '시간' 또는 '시' 중 어떤 것으로 되어 있든 모두 대응하도록 수정
+
+        local text2 = string.format("%02d시간 %02d분 %02d초", timeData.h2, timeData.m2, timeData.s2)
+
+        local text3 = string.format("총합 레이더 처치 %d · 주간 레이더 처치 %d", timeData.radarTotal, timeData.radarWeekly)
+
+
+        for _, gui in ipairs(workspace:GetDescendants()) do
+
+            if gui:IsA("SurfaceGui") then
+
+                for _, lbl in ipairs(gui:GetDescendants()) do
+
+                    if lbl:IsA("TextLabel") then
+
+                        -- 총합: '일', '시', '분'이 모두 포함된 텍스트
+
+                        if string.find(lbl.Text, "일") and string.find(lbl.Text, "시") and string.find(lbl.Text, "분") then
+
+                            lbl.Text = text1
+
+                        -- 일일: '분'과 '초'가 들어가면서 '총합'이라는 단어가 없는 텍스트 (시간/시 둘 다 커버)
+
+                        elseif (string.find(lbl.Text, "시간") or string.find(lbl.Text, "시")) and string.find(lbl.Text, "분") and not string.find(lbl.Text, "총합") then
+
+                            lbl.Text = text2
+
+                        elseif string.find(lbl.Text, "레이더") then
+
+                            lbl.Text = text3
+
+                        end
+
+                    end
+
+                end
+
+            end
+
+        end
+
+    end)
+
+end
+
+
+local function createControlRow(posY, labelText, callback1, callback2, callback3, callback4)
+
+    local sectionLbl = Instance.new("TextLabel")
+
+    sectionLbl.Size = UDim2.new(0.9, 0, 0, 18)
+
+    sectionLbl.Position = UDim2.new(0.05, 0, 0, posY)
+
+    sectionLbl.BackgroundTransparency = 1
+
+    sectionLbl.TextColor3 = Color3.fromRGB(180, 180, 190)
+
+    sectionLbl.Text = labelText
+
+    sectionLbl.TextSize = 11
+
+    sectionLbl.Font = Enum.Font.Gotham
+
+    sectionLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+    sectionLbl.Parent = frame
+
+
+    local btnTexts = {"1일+", "1시+", "1분+", "01초+"}
+
+    local callbacks = {callback1, callback2, callback3, callback4}
+
+   
+
+    for i = 1, 4 do
+
+        if not callbacks[i] then continue end
+
+        local btn = Instance.new("TextButton")
+
+        btn.Size = UDim2.new(0.21, 0, 0, 26)
+
+        btn.Position = UDim2.new(0.05 + (i-1) * 0.23, 0, 0, posY + 20)
+
+        btn.BackgroundColor3 = Color3.fromRGB(55, 55, 65)
+
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+        btn.Text = btnTexts[i]
+
+        btn.TextSize = 11
+
+        btn.Font = Enum.Font.GothamBold
+
+        btn.Parent = frame
+
+       
+
+        local corner = Instance.new("UICorner")
+
+        corner.CornerRadius = UDim.new(0, 6)
+
+        corner.Parent = btn
+
+       
+
+        btn.MouseButton1Click:Connect(function()
+
+            callbacks[i]()
+
+            startLockLoop()
+
+        end)
+
+    end
+
+end
+
+
+createControlRow(50, "-- 총합플레이시간 늘리기",
+
+    function() timeData.d1 = timeData.d1 + 1 end,
+
+    function() timeData.h1 = timeData.h1 + 1 end,
+
+    function() timeData.m1 = timeData.m1 + 1 end,
+
+    function() timeData.s1 = timeData.s1 + 1 end
+
+)
+
+
+createControlRow(120, "-- 일일플레이시간 늘리기",
+
+    nil,
+
+    function() timeData.h2 = timeData.h2 + 1 end,
+
+    function() timeData.m2 = timeData.m2 + 1 end,
+
+    function() timeData.s2 = timeData.s2 + 1 end
+
+)
+
+
+local radarLbl = Instance.new("TextLabel")
+
+radarLbl.Size = UDim2.new(0.9, 0, 0, 18)
+
+radarLbl.Position = UDim2.new(0.05, 0, 0, 190)
+
+radarLbl.BackgroundTransparency = 1
+
+radarLbl.TextColor3 = Color3.fromRGB(180, 180, 190)
+
+radarLbl.Text = "-- 총합 레이더처치 늘리기"
+
+radarLbl.TextSize = 11
+
+radarLbl.Font = Enum.Font.Gotham
+
+radarLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+radarLbl.Parent = frame
+
+
+local btnRadarTotal = Instance.new("TextButton")
+
+btnRadarTotal.Size = UDim2.new(0.44, 0, 0, 26)
+
+btnRadarTotal.Position = UDim2.new(0.05, 0, 0, 210)
+
+btnRadarTotal.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
+
+btnRadarTotal.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+btnRadarTotal.Text = "총합 레이더처치 1+"
+
+btnRadarTotal.TextSize = 11
+
+btnRadarTotal.Font = Enum.Font.GothamBold
+
+btnRadarTotal.Parent = frame
+
+local c1 = Instance.new("UICorner"); c1.CornerRadius = UDim.new(0, 6); c1.Parent = btnRadarTotal
+
+btnRadarTotal.MouseButton1Click:Connect(function()
+
+    timeData.radarTotal = timeData.radarTotal + 1
+
+    startLockLoop()
+
+end)
+
+
+local btnRadarWeekly = Instance.new("TextButton")
+
+btnRadarWeekly.Size = UDim2.new(0.44, 0, 0, 26)
+
+btnRadarWeekly.Position = UDim2.new(0.51, 0, 0, 210)
+
+btnRadarWeekly.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
+
+btnRadarWeekly.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+btnRadarWeekly.Text = "주간 레이더처치 1+"
+
+btnRadarWeekly.TextSize = 11
+
+btnRadarWeekly.Font = Enum.Font.GothamBold
+
+btnRadarWeekly.Parent = frame
+
+local c2 = Instance.new("UICorner"); c2.CornerRadius = UDim.new(0, 6); c2.Parent = btnRadarWeekly
+
+btnRadarWeekly.MouseButton1Click:Connect(function()
+
+    timeData.radarWeekly = timeData.radarWeekly + 1
+
+    startLockLoop()
+
+end)
