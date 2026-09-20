@@ -1,1 +1,289 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
+if player.PlayerGui:FindFirstChild("StatusCloneGui") then
+    player.PlayerGui.StatusCloneGui:Destroy()
+end
+
+local cloneCoords = {
+    Vector3.new(105.85, 203.96, -274.40),
+    Vector3.new(105.85, 203.96, -271.50),
+    Vector3.new(105.85, 203.96, -268.60),
+    Vector3.new(105.85, 203.96, -261.90),
+    Vector3.new(105.85, 203.96, -259.00),
+    Vector3.new(105.85, 203.96, -256.10)
+}
+
+local targetPosition = Vector3.new(105.85, 203.96, -256.10)
+local spawnedClones = {}
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "StatusCloneGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player.PlayerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 430, 0, 290)
+frame.Position = UDim2.new(0.5, -215, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 8)
+uiCorner.Parent = frame
+
+local dragging, dragInput, dragStart, startPos
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.Text = "승급사기 관리기 <자신 클론 생성임.팀 변경뒤 하시면됨>"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 14
+title.Font = Enum.Font.GothamBold
+title.Parent = frame
+
+local tpButton = Instance.new("TextButton")
+tpButton.Size = UDim2.new(1, -20, 0, 28)
+tpButton.Position = UDim2.new(0, 10, 0, 35)
+tpButton.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+tpButton.BorderSizePixel = 0
+tpButton.Text = "교육실 이동하기"
+tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpButton.TextSize = 12
+tpButton.Font = Enum.Font.GothamBold
+tpButton.Parent = frame
+
+local tpCorner = Instance.new("UICorner")
+tpCorner.CornerRadius = UDim.new(0, 6)
+tpCorner.Parent = tpButton
+
+tpButton.MouseButton1Click:Connect(function()
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
+        tpButton.Text = "이동완료"
+        task.wait(1)
+        tpButton.Text = "교육실 이동하기"
+    end
+end)
+
+local function createCloneRow(index, yPos)
+    local numLabel = Instance.new("TextLabel")
+    numLabel.Size = UDim2.new(0, 20, 0, 28)
+    numLabel.Position = UDim2.new(0, 10, 0, yPos)
+    numLabel.BackgroundTransparency = 1
+    numLabel.Text = index .. ""
+    numLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    numLabel.TextSize = 12
+    numLabel.Font = Enum.Font.GothamBold
+    numLabel.Parent = frame
+
+    local nameBox = Instance.new("TextBox")
+    nameBox.Size = UDim2.new(0, 95, 0, 28)
+    nameBox.Position = UDim2.new(0, 35, 0, yPos)
+    nameBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    nameBox.BorderSizePixel = 0
+    nameBox.PlaceholderText = "닉네임"
+    nameBox.Text = ""
+    nameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+    nameBox.TextSize = 11
+    nameBox.Font = Enum.Font.Gotham
+    nameBox.Parent = frame
+    
+    local nCorner = Instance.new("UICorner")
+    nCorner.CornerRadius = UDim.new(0, 4)
+    nCorner.Parent = nameBox
+
+    local tagBox = Instance.new("TextBox")
+    tagBox.Size = UDim2.new(0, 110, 0, 28)
+    tagBox.Position = UDim2.new(0, 135, 0, yPos)
+    tagBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    tagBox.BorderSizePixel = 0
+    tagBox.PlaceholderText = "태그 내용"
+    tagBox.Text = ""
+    tagBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tagBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+    tagBox.TextSize = 11
+    tagBox.Font = Enum.Font.Gotham
+    tagBox.Parent = frame
+    
+    local tCorner = Instance.new("UICorner")
+    tCorner.CornerRadius = UDim.new(0, 4)
+    tCorner.Parent = tagBox
+
+    local createBtn = Instance.new("TextButton")
+    createBtn.Size = UDim2.new(0, 42, 0, 28)
+    createBtn.Position = UDim2.new(0, 250, 0, yPos)
+    createBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+    createBtn.BorderSizePixel = 0
+    createBtn.Text = "생성"
+    createBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    createBtn.TextSize = 11
+    createBtn.Font = Enum.Font.GothamBold
+    createBtn.Parent = frame
+    
+    local cCorner = Instance.new("UICorner")
+    cCorner.CornerRadius = UDim.new(0, 4)
+    cCorner.Parent = createBtn
+
+    local deleteBtn = Instance.new("TextButton")
+    deleteBtn.Size = UDim2.new(0, 42, 0, 28)
+    deleteBtn.Position = UDim2.new(0, 296, 0, yPos)
+    deleteBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+    deleteBtn.BorderSizePixel = 0
+    deleteBtn.Text = "삭제"
+    deleteBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    deleteBtn.TextSize = 11
+    deleteBtn.Font = Enum.Font.GothamBold
+    deleteBtn.Parent = frame
+    
+    local dCorner = Instance.new("UICorner")
+    dCorner.CornerRadius = UDim.new(0, 4)
+    dCorner.Parent = deleteBtn
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(0, 75, 0, 28)
+    statusLabel.Position = UDim2.new(0, 342, 0, yPos)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "생성안됨"
+    statusLabel.TextColor3 = Color3.fromRGB(231, 76, 60)
+    statusLabel.TextSize = 11
+    statusLabel.Font = Enum.Font.GothamBold
+    statusLabel.Parent = frame
+
+    createBtn.MouseButton1Click:Connect(function()
+        local char = player.Character
+        if not char then return end
+
+        if spawnedClones[index] and spawnedClones[index].Parent then
+            spawnedClones[index]:Destroy()
+        end
+
+        char.Archivable = true
+        local cloneChar = char:Clone()
+        char.Archivable = false
+        
+        cloneChar.Name = "StatusClone_" .. index
+        
+        for _, obj in ipairs(cloneChar:GetDescendants()) do
+            if obj:IsA("Script") or obj:IsA("LocalScript") then
+                obj:Destroy()
+            elseif obj:IsA("BasePart") then
+                obj.CanCollide = false
+            end
+        end
+
+        for _, joint in ipairs(cloneChar:GetDescendants()) do
+            if joint:IsA("Motor6D") and (joint.Name == "Right Shoulder" or joint.Name == "Left Shoulder" or joint.Name == "RightUpperArm" or joint.Name == "LeftUpperArm") then
+                joint.C1 = CFrame.new(0, 0.5, 0) * CFrame.Angles(math.rad(90), 0, 0)
+            end
+        end
+
+        local rootPart = cloneChar:FindFirstChild("HumanoidRootPart")
+        local humanoid = cloneChar:FindFirstChildOfClass("Humanoid")
+        
+        if rootPart then
+            rootPart.CFrame = CFrame.new(cloneCoords[index])
+        end
+        
+        if humanoid then
+            humanoid.Sit = true
+        end
+
+        for _, part in ipairs(cloneChar:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Anchored = true
+            end
+        end
+
+        local customName = nameBox.Text
+        if customName == "" then
+            customName = player.Name
+        end
+
+        cloneChar.Parent = workspace
+        spawnedClones[index] = cloneChar
+
+        statusLabel.Text = "생성됨"
+        statusLabel.TextColor3 = Color3.fromRGB(46, 204, 113)
+
+        local head = cloneChar:FindFirstChild("Head")
+        if head then
+            local nameTag = head:FindFirstChild("NameTag")
+            if nameTag then
+                local usernameLabel = nameTag:FindFirstChild("Username")
+                if usernameLabel and usernameLabel:IsA("TextLabel") then
+                    usernameLabel.Text = customName
+                end
+            end
+
+            local tagGui = head:FindFirstChild("Tag")
+            if not tagGui and tagBox.Text ~= "" then
+                tagGui = Instance.new("BillboardGui")
+                tagGui.Name = "Tag"
+                tagGui.Size = UDim2.new(0, 200, 0, 50)
+                tagGui.StudsOffset = Vector3.new(0, 3.2, 0)
+                tagGui.AlwaysOnTop = true
+                tagGui.Adornee = head
+                tagGui.Parent = head
+
+                local tagTextLabel = Instance.new("TextLabel")
+                tagTextLabel.Size = UDim2.new(1, 0, 1, 0)
+                tagTextLabel.BackgroundTransparency = 1
+                tagTextLabel.Text = tagBox.Text
+                tagTextLabel.TextColor3 = Color3.fromRGB(85, 255, 0)
+                tagTextLabel.TextStrokeTransparency = 0
+                tagTextLabel.TextSize = 14
+                tagTextLabel.Font = Enum.Font.GothamBold
+                tagTextLabel.Parent = tagGui
+            elseif tagGui and tagBox.Text ~= "" then
+                local tagTextLabel = tagGui:FindFirstChild("TextLabel")
+                if tagTextLabel and tagTextLabel:IsA("TextLabel") then
+                    tagTextLabel.Text = tagBox.Text
+                end
+            end
+        end
+    end)
+
+    deleteBtn.MouseButton1Click:Connect(function()
+        if spawnedClones[index] and spawnedClones[index].Parent then
+            spawnedClones[index]:Destroy()
+            spawnedClones[index] = nil
+        end
+        statusLabel.Text = "생성안됨"
+        statusLabel.TextColor3 = Color3.fromRGB(231, 76, 60)
+    end)
+end
+
+for i = 1, 6 do
+    createCloneRow(i, 75 + (i - 1) * 35)
+end
