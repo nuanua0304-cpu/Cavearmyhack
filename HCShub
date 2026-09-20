@@ -71,7 +71,7 @@ app.get('/api/log', (req, res) => {
     res.json({ success: true });
 });
 
-// 3. 비공개 스크립트 연결 API (/api/script) - 보내주신 Cavearmyhack Raw 링크 적용 완료
+// 3. 비공개 스크립트 연결 API (/api/script)
 app.get('/api/script', async (req, res) => {
     const robloxName = req.query.roblox;
     const productId = req.query.product;
