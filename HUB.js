@@ -3,11 +3,7 @@ const {
     GatewayIntentBits,
     PermissionFlagsBits,
     SlashCommandBuilder,
-    EmbedBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    ChannelType
+    EmbedBuilder
 } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
@@ -46,14 +42,10 @@ app.get('/api/hub', (req, res) => {
         return res.json({ success: false, message: "roblox 쿼리가 누락되었습니다." });
     }
 
-    // 해당 로블록스 닉네임으로 등록된 라이센스 탐색
     let matchedLicense = null;
-    let matchedDiscordUid = null;
-
     for (const [uid, data] of Object.entries(licensesData)) {
         if (data.robloxName === robloxName) {
             matchedLicense = data;
-            matchedDiscordUid = uid;
             break;
         }
     }
@@ -67,7 +59,7 @@ app.get('/api/hub', (req, res) => {
         robloxName: robloxName,
         discordName: matchedLicense.discordName || "HCS User",
         discordPfp: matchedLicense.discordPfp || "https://cdn.discordapp.com/embed/avatars/0.png",
-        products: matchedLicense.products || [] // 등록된 제품 리스트
+        products: matchedLicense.products || []
     });
 });
 
@@ -79,30 +71,41 @@ app.get('/api/log', (req, res) => {
     res.json({ success: true });
 });
 
-// 3. 비공개 스크립트 반환 API (/api/script)
-// ※ 버튼을 눌렀을 때 실행될 실제 비공개 스크립트 코드를 이 안에서 제품별로 리턴해주시면 됩니다!
-app.get('/api/script', (req, res) => {
+// 3. 비공개 스크립트 연결 API (/api/script)
+app.get('/api/script', async (req, res) => {
     const robloxName = req.query.roblox;
     const productId = req.query.product;
 
     if (!robloxName || !productId) {
-        return res.status(400).send("잘못된 요청입니다.");
+        return res.status(400).send("print('잘못된 요청입니다.')");
     }
 
-    let luaScriptCode = "";
-    
-    // 제품별 비공개 스크립트 분기 처리
-    if (productId === "pc_v1") {
-        luaScriptCode = `print("동굴부대 PC V1 비공개 스크립트 실행됨!")`;
-    } else if (productId === "pc_v2") {
-        luaScriptCode = `print("동굴부대 PC V2 비공개 스크립트 실행됨!")`;
-    } else if (productId === "vip") {
-        luaScriptCode = `print("VIP 스크립트 실행됨!")`;
-    } else {
-        luaScriptCode = `print("${productId} 스크립트 실행됨!")`;
+    // 깃허브에 올려둔 비공개 .lua 파일들의 Raw 주소 매핑 (본인의 계정명/저장소명으로 수정하세요)
+    const scriptUrls = {
+        pc_v1: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/pc_v1.lua",
+        pc_v2: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/pc_v2.lua",
+        pc_v3: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/pc_v3.lua",
+        mov_v1: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/mov_v1.lua",
+        mov_v2: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/mov_v2.lua",
+        mov_v3: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/mov_v3.lua",
+        tdc: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/tdc.lua",
+        mp: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/mp.lua",
+        vip: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/vip.lua"
+    };
+
+    const targetUrl = scriptUrls[productId];
+    if (!targetUrl) {
+        return res.status(404).send("print('존재하지 않는 스크립트입니다.')");
     }
 
-    res.send(luaScriptCode.trim());
+    try {
+        const response = await fetch(targetUrl);
+        if (!response.ok) throw new Error("GitHub fetch failed");
+        const scriptText = await response.text();
+        res.send(scriptText);
+    } catch (err) {
+        res.status(500).send("print('스크립트 로드 중 오류가 발생했습니다.')");
+    }
 });
 
 app.listen(PORT, () => {
@@ -136,7 +139,7 @@ const productChoices = [
 const commands = [
     new SlashCommandBuilder()
         .setName('라이센스영구')
-        .setDescription('특정 디스코드 유저에게 로블록스 닉네임과 제품을 연동하여 영구 라이센스를 부여합니다.')
+        .setDescription('디스코드 유저에게 로블록스 닉네임과 제품을 연동하여 영구 라이센스를 부여합니다.')
         .addUserOption(o => o.setName('유저').setDescription('대상 디스코드 유저').setRequired(true))
         .addStringOption(o => o.setName('로블록스닉네임').setDescription('연동할 로블록스 닉네임').setRequired(true))
         .addStringOption(o => o.setName('제품').setDescription('부여할 제품 선택').setRequired(true).addChoices(...productChoices)),
@@ -171,12 +174,11 @@ client.on('interactionCreate', async i => {
             const robloxName = i.options.getString('로블록스닉네임');
             const product = i.options.getString('제품');
 
-            // 유저 프로필 사진 및 이름 추출 저장
             licensesData[targetUser.id] = {
                 robloxName: robloxName,
                 discordName: targetUser.username,
                 discordPfp: targetUser.displayAvatarURL({ extension: 'png', size: 256 }),
-                products: [product] // 선택한 제품 부여
+                products: [product]
             };
             saveLicenses();
 
