@@ -116,7 +116,7 @@ function initUserPoints(uid) {
 }
 
 // ==========================================
-// Express API 엔드포인트 (로블록스 허브 연동)
+// Express API 엔드포인트 (로블록스 허브 연동 및 닉네임 자동 인증)
 // ==========================================
 
 // 1. 유저 인증 및 허브 정보 확인 API (/api/hub)
@@ -126,7 +126,15 @@ app.get('/api/hub', (req, res) => {
         return res.json({ success: false, message: "roblox 쿼리가 누락되었습니다." });
     }
 
-    // 예시 데이터 연동 (필요에 따라 라이센스나 DB와 연동 가능)
+    // 디스코드 봇을 통해 /라이센스영구 로블록스닉네임 으로 등록된 유저인지 검사
+    const isValid = Object.values(licensesData).some(license => 
+        license.type === 'permanent' && license.robloxName === robloxName
+    );
+
+    if (!isValid) {
+        return res.json({ success: false, message: "등록되지 않은 유저입니다." });
+    }
+
     res.json({
         success: true,
         robloxName: robloxName,
@@ -169,38 +177,12 @@ app.get('/api/script', (req, res) => {
     res.send(luaScriptCode.trim());
 });
 
-// 4. 라이센스 검증 API (/verify) - 디스코드 봇과 연동
-app.get('/verify', (req, res) => {
-    const { code, user } = req.query;
-    if (!code || !user) return res.send('INVALID');
-    const license = licensesData[code];
-    if (!license) return res.send('INVALID');
-
-    // 1회용 (24시간) 라이센스 확인
-    if (license.type === '1day') {
-        if (Date.now() > license.expireAt) {
-            delete licensesData[code];
-            saveLicenses();
-            return res.send('EXPIRED');
-        }
-        return res.send('VALID');
-    }
-
-    // 영구 (특정 유저 전용) 라이센스 확인
-    if (license.type === 'permanent') {
-        if (license.robloxName !== user) return res.send('INVALID_USER');
-        return res.send('VALID');
-    }
-
-    res.send('INVALID');
-});
-
 app.listen(PORT, () => {
     console.log(`[EXPRESS] HCS 허브 & 라이센스 서버가 포트 ${PORT}에서 구동되었습니다! 🚀`);
 });
 
 // ==========================================
-// Discord 봇 설정 (기존 명령어 및 기능 포함)
+// Discord 봇 설정 (라이센스 명령어 포함)
 // ==========================================
 const client = new Client({
     intents: [
@@ -212,9 +194,14 @@ const client = new Client({
 });
 
 const commands = [
-    new SlashCommandBuilder().setName('라이센스1회용').setDescription('하루(24시간) 동안 사용할 수 있는 라이센스를 생성합니다. (관리자 전용)'),
-    new SlashCommandBuilder().setName('라이센스영구').setDescription('특정 로블록스 유저 전용 영구 라이센스를 생성합니다. (관리자 전용)').addStringOption(o=>o.setName('로블록스닉네임').setDescription('사용 가능한 로블록스 닉네임').setRequired(true)),
-    new SlashCommandBuilder().setName('라이센스제거').setDescription('등록된 라이센스를 제거합니다. (관리자 전용)').addStringOption(o=>o.setName('코드').setDescription('제거 할 라이센스 코드').setRequired(true))
+    new SlashCommandBuilder()
+        .setName('라이센스영구')
+        .setDescription('특정 로블록스 유저 전용 영구 라이센스를 생성합니다. (관리자 전용)')
+        .addStringOption(o => o.setName('로블록스닉네임').setDescription('사용 가능한 로블록스 닉네임').setRequired(true)),
+    new SlashCommandBuilder()
+        .setName('라이센스제거')
+        .setDescription('등록된 라이센스를 제거합니다. (관리자 전용)')
+        .addStringOption(o => o.setName('코드').setDescription('제거 할 라이센스 코드').setRequired(true))
 ];
 
 client.once('ready', async () => {
@@ -236,16 +223,6 @@ client.on('interactionCreate', async i => {
 
     try {
         await i.deferReply({ flags: 64 });
-        if (i.commandName === '라이센스1회용') {
-            const code = generateLicenseCode();
-            licensesData[code] = { type: '1day', expireAt: Date.now() + (24 * 60 * 60 * 1000), robloxName: null };
-            saveLicenses();
-            const embed = new EmbedBuilder()
-                .setTitle('🌐 라이센스 하루용이 추가되었어요!')
-                .setDescription(`\`\`\`${code}\`\`\`\n-# ^^^ 복사해서 사용하세요.`)
-                .setColor('#00FF00');
-            return await i.editReply({ embeds: [embed] });
-        }
         if (i.commandName === '라이센스영구') {
             const robloxName = i.options.getString('로블록스닉네임');
             const code = generateLicenseCode();
@@ -253,7 +230,7 @@ client.on('interactionCreate', async i => {
             saveLicenses();
             const embed = new EmbedBuilder()
                 .setTitle('🌐 라이센스 영구 유저용이 추가되었어요!')
-                .setDescription(`\`\`\`${code}\`\`\`\n\`\`\`${robloxName}만 사용이 가능합니다.\`\`\`\n-# ^^^ 복사해서 사용하세요.`)
+                .setDescription(`\`\`\`${code}\`\`\`\n\`\`\`${robloxName}만 사용이 가능합니다.\`\`\``)
                 .setColor('#0099FF');
             return await i.editReply({ embeds: [embed] });
         }
