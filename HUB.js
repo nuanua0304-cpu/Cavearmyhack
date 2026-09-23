@@ -80,30 +80,73 @@ app.get('/api/script', async (req, res) => {
         return res.status(400).send("print('잘못된 요청입니다.')");
     }
 
-    // 깃허브에 올려둔 비공개 .lua 파일들의 Raw 주소 매핑 (본인의 계정명/저장소명으로 수정하세요)
-    const scriptUrls = {
-        pc_v1: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/pc_v1.lua",
-        pc_v2: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/pc_v2.lua",
-        pc_v3: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/pc_v3.lua",
-        mov_v1: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/mov_v1.lua",
-        mov_v2: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/mov_v2.lua",
-        mov_v3: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/mov_v3.lua",
-        tdc: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/tdc.lua",
-        mp: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/mp.lua",
-        vip: "https://raw.githubusercontent.com/nuanua0304-cpu/HCS/main/vip.lua"
+    const scriptPaths = {
+        pc_v1: "pc_v1.lua",
+        pc_v2: "pc_v2.lua",
+        pc_v3: "pc_v3.lua",
+        mov_v1: "mov_v1.lua",
+        mov_v2: "mov_v2.lua",
+        mov_v3: "mov_v3.lua",
+        tdc: "tdc.lua",
+        mp: "mp.lua",
+        vip: "vip.lua"
     };
 
-    const targetUrl = scriptUrls[productId];
-    if (!targetUrl) {
+    const targetPath = scriptPaths[productId];
+
+    if (!targetPath) {
         return res.status(404).send("print('존재하지 않는 스크립트입니다.')");
     }
 
+    const githubToken = process.env.GITHUB_TOKEN;
+
+    if (!githubToken) {
+        console.error("[GITHUB] GITHUB_TOKEN 환경변수가 없습니다.");
+        return res.status(500).send("print('서버 인증 설정이 되어있지 않습니다.')");
+    }
+
+    const githubApiUrl =
+        `https://api.github.com/repos/nuanua0304-cpu/HCS/contents/${targetPath}?ref=main`;
+
     try {
-        const response = await fetch(targetUrl);
-        if (!response.ok) throw new Error("GitHub fetch failed");
-        const scriptText = await response.text();
-        res.send(scriptText);
+        const response = await fetch(githubApiUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${githubToken}`,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28',
+                'User-Agent': 'HCS-HUB'
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[GITHUB] 요청 실패: ${response.status}`);
+            console.error(errorText);
+
+            throw new Error(`GitHub API error: ${response.status}`);
+        }
+
+        const fileData = await response.json();
+
+        if (!fileData.content) {
+            throw new Error("GitHub 파일 내용이 없습니다.");
+        }
+
+        const scriptText = Buffer
+            .from(fileData.content.replace(/\n/g, ''), 'base64')
+            .toString('utf8');
+
+        if (!scriptText || scriptText.trim() === "") {
+            throw new Error("스크립트 내용이 비어 있습니다.");
+        }
+
+        console.log(`[SCRIPT] ${robloxName} -> ${productId} 로드 성공`);
+
+        res.type('text/plain').send(scriptText);
+
     } catch (err) {
+        console.error("[GITHUB] 스크립트 로드 오류:", err);
         res.status(500).send("print('스크립트 로드 중 오류가 발생했습니다.')");
     }
 });
@@ -146,7 +189,7 @@ const commands = [
     new SlashCommandBuilder()
         .setName('라이센스제거')
         .setDescription('특정 디스코드 유저의 라이센스를 제거합니다.')
-        .addUserOption(o => o.setName('유저').setDescription('대상 유저').setRequired(true))
+        .addUserOption(o => o.setName('유저').setDescription('대상 디스코드 유저').setRequired(true))
 ];
 
 client.once('ready', async () => {
